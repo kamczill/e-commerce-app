@@ -1,8 +1,9 @@
 from rest_framework import generics, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
-from .serializers import ProductSerializer, CategorySerializer
-from .models import Product, Category
+from django.core.mail import send_mail
+from .serializers import ProductSerializer, CategorySerializer, OrderSerializer
+from .models import Product, Category, Order
 
 # custom permission class
 class IsMerchantUser(permissions.BasePermission):
@@ -75,3 +76,19 @@ class ProductDeleteView(generics.DestroyAPIView):
         """Ensure a merchant can only update their own products."""
         user = self.request.user
         return user.products.all()
+
+class CreateOrderView(generics.CreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        order = serializer.save()
+        # Send confirmation email
+        send_mail(
+            'Order Confirmation',
+            f'Your order with ID {order.id} has been placed successfully.',
+            'from@example.com',
+            [order.customer.email],
+            fail_silently=False,
+        )
