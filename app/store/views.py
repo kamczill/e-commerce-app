@@ -4,6 +4,11 @@ from rest_framework.filters import OrderingFilter
 from django.core.mail import send_mail
 from .serializers import ProductSerializer, CategorySerializer, OrderSerializer
 from .models import Product, Category, Order
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import OrderItem
+from django.db.models import Count, Q
+from datetime import datetime
 
 # custom permission class
 class IsMerchantUser(permissions.BasePermission):
@@ -20,7 +25,7 @@ class IsMerchantOrSuperuser(permissions.BasePermission):
         return request.user.is_authenticated and (request.user.is_merchant or request.user.is_superuser)
 
 class IsSuperuser(permissions.BasePermission):
-    def has_permission(self, request, view):
+    def has_permission(self, request):
         return request.user.is_authenticated and request.user.is_superuser
 
 class CategoryListCreateView(generics.ListCreateAPIView):
@@ -92,3 +97,26 @@ class CreateOrderView(generics.CreateAPIView):
             [order.customer.email],
             fail_silently=False,
         )
+
+class ProductStatisticsView(APIView):
+    permission_classes = [IsMerchantUser]  # Custom permission class for merchant status
+
+    def get(self, request, date_from, date_to, num_products):
+        # Convert date strings to datetime objects
+        try:
+            date_from = datetime.strptime(date_from, '%Y-%m-%d')
+            date_to = datetime.strptime(date_to, '%Y-%m-%d')
+            num_products = int(num_products)
+        except ValueError:
+            return Response({"error": "Invalid date format or number. Use YYYY-MM-DD for dates and an integer for number of products."}, status=400)
+
+        # Query the OrderItem model
+        product_stats = OrderItem.objects.filter(
+            order__order_date__range=(date_from, date_to)
+        ).values(
+            'product__name'
+        ).annotate(
+            total_ordered=Count('id')
+        ).order_by('-total_ordered')[:num_products]
+
+        return Response(product_stats)

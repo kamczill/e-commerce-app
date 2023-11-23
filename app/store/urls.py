@@ -7,6 +7,7 @@ from .views import (
     ProductCreateView,
     ProductUpdateView,
     ProductDeleteView,
+    ProductStatisticsView,
     CreateOrderView
 )
 
@@ -20,6 +21,5 @@ urlpatterns = [
     path('products/update/<int:pk>/', ProductUpdateView.as_view(), name='product-update'),
     path('products/delete/<int:pk>/', ProductDeleteView.as_view(), name='product-delete'),
     path('orders/create/', CreateOrderView.as_view(), name='create-order'),
-
-
+    path('api/store/product-statistics/<str:date_from>/<str:date_to>/<int:num_products>/', ProductStatisticsView.as_view(), name='product-statistics'),
 ]
