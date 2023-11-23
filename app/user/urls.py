@@ -8,4 +8,6 @@ urlpatterns = [
     path('create/', views.CreateUserView.as_view(), name='create'),
     path('token/', views.CreateTokenView.as_view(), name='token'),
     path('me/', views.ManageUserView.as_view(), name='me'),
+    path('set-merchant-status/<int:user_id>/<str:status>/', views.SetMerchantStatusView.as_view(), name='set-merchant-status'),
+
 ]

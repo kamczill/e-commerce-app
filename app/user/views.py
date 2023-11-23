@@ -1,6 +1,10 @@
 from rest_framework import generics, authentication, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import authentication, permissions
+from .models import User
 
 
 from user.serializers import UserSerializer, AuthTokenSerializer
@@ -24,3 +28,20 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         """Retrieve and return the authenticated user."""
         return self.request.user
+
+
+class SetMerchantStatusView(APIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, user_id, status):
+        # Convert status to boolean
+        status_bool = status.lower() == 'true'
+
+        try:
+            user = User.objects.get(id=user_id)
+            user.is_merchant = status_bool
+            user.save()
+            return Response({'status': 'success', 'message': 'Merchant status updated'})
+        except User.DoesNotExist:
+            return Response({'status': 'error', 'message': 'User not found'}, status=404)
