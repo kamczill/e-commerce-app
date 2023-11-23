@@ -58,3 +58,7 @@ class AuthTokenSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+class MerchantStatusSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    status = serializers.BooleanField()
