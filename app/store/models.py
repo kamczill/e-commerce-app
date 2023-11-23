@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 from PIL import Image
+from .tasks import send_payment_reminder_email
 import os
 
 
@@ -69,6 +70,9 @@ class Order(models.Model):
             if not self.order_date:
                 self.order_date = timezone.now()
             self.payment_due = self.order_date + timedelta(days=5)
+            if self._state.adding:
+                reminder_time = self.payment_due - timedelta(days=1)
+                send_payment_reminder_email.apply_async((self.id,), eta=reminder_time)
         super().save(*args, **kwargs)
 
 
