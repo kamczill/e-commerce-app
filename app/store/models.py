@@ -37,23 +37,19 @@ class Product(models.Model):
         return f'{base}_thumbnail{ext}'
 
     def generate_thumbnail(self):
-        try:
-            img = Image.open(self.image.path)
-            if img.width > 200:
-                # Calculate the new height to maintain the aspect ratio
-                ratio = (200.0 / img.width)
-                new_height = int(img.height * ratio)
+            try:
+                img = Image.open(self.image.path)
+                if img.width > 200:
+                    output_size = (200, int((200 / img.width) * img.height))
+                    img.thumbnail(output_size, Image.Resampling.LANCZOS)
+                    thumb_path = self.get_thumbnail_path()
+                    img.save(thumb_path)
 
-                output_size = (200, new_height)
-                img.thumbnail(output_size, Image.ANTIALIAS)
-                thumb_path = self.get_thumbnail_path()
-                img.save(thumb_path)
-
-                # Update the thumbnail field
-                self.thumbnail = self.create_thumbnail_filename()
-                self.save(update_fields=['thumbnail'])
-        except IOError:
-            print("Error in generating thumbnail for", self.image.path)
+                    # Update the thumbnail field
+                    self.thumbnail = self.create_thumbnail_filename()
+                    self.save(update_fields=['thumbnail'])
+            except IOError:
+                print("Error in generating thumbnail for", self.image.path)
 
     def __str__(self):
         return self.name
