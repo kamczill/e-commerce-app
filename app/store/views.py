@@ -1,8 +1,8 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from django.core.mail import send_mail
-from .serializers import ProductSerializer, CategorySerializer, OrderSerializer
+from .serializers import ProductSerializer, CategorySerializer, OrderSerializer, ProductStatisticSerializer
 from .models import Product, Category, Order
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,9 +16,6 @@ class IsMerchantUser(permissions.BasePermission):
         return request.user.is_authenticated and request.user.is_merchant
 
 class IsMerchantOrSuperuser(permissions.BasePermission):
-    """
-    Allows access only to merchant or superuser users for write operations.
-    """
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -82,6 +79,13 @@ class ProductDeleteView(generics.DestroyAPIView):
         user = self.request.user
         return user.products.all()
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        object_id = self.kwargs['pk']
+        return Response({'status': 'success', 'message': f'Product with ID {object_id} has been successfully deleted.'}, status=status.HTTP_200_OK)
+
+
 class CreateOrderView(generics.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -100,6 +104,7 @@ class CreateOrderView(generics.CreateAPIView):
 
 class ProductStatisticsView(APIView):
     permission_classes = [IsMerchantUser]  # Custom permission class for merchant status
+    serializer_class = ProductStatisticSerializer
 
     def get(self, request, date_from, date_to, num_products):
         # Convert date strings to datetime objects
