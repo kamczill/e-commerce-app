@@ -22,6 +22,10 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ['product', 'quantity', 'product_price']
 
+class ProductStatisticSerializer(serializers.Serializer):
+    product_name = serializers.CharField()
+    total_ordered = serializers.IntegerField()
+
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
