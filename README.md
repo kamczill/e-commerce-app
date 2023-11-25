@@ -39,6 +39,7 @@ Follow these steps to set up the project:
     ```
 4. **Run Migrations:**
     ```bash
+    cd app/
     python manage.py migrate
     ```
 
