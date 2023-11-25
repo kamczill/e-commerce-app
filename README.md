@@ -18,6 +18,10 @@ This e-commerce application is a Django-based web application designed to provid
 - RabbitMQ as the message broker for Celery
 - Other Django and Python libraries as required
 
+## Prerequisites
+- Python 3.10.12
+- Git
+
 ## Installation
 Follow these steps to set up the project:
 
