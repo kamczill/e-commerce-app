@@ -7,10 +7,10 @@ from .models import Product, Category, Order
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import OrderItem
-from django.db.models import Count, Q
+from django.db.models import Count
 from datetime import datetime
 
-# custom permission class
+# custom permission classes
 class IsMerchantUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_merchant
@@ -24,6 +24,7 @@ class IsMerchantOrSuperuser(permissions.BasePermission):
 class IsSuperuser(permissions.BasePermission):
     def has_permission(self, request):
         return request.user.is_authenticated and request.user.is_superuser
+
 
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -65,7 +66,6 @@ class ProductUpdateView(generics.UpdateAPIView):
     permission_classes = [IsMerchantUser]
 
     def get_queryset(self):
-        """Ensure a merchant can only update their own products."""
         user = self.request.user
         return user.products.all()
 
@@ -75,7 +75,6 @@ class ProductDeleteView(generics.DestroyAPIView):
     permission_classes = [IsMerchantUser]
 
     def get_queryset(self):
-        """Ensure a merchant can only update their own products."""
         user = self.request.user
         return user.products.all()
 
@@ -93,7 +92,6 @@ class CreateOrderView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         order = serializer.save()
-        # Send confirmation email
         send_mail(
             'Order Confirmation',
             f'Your order with ID {order.id} has been placed successfully.',
@@ -103,11 +101,10 @@ class CreateOrderView(generics.CreateAPIView):
         )
 
 class ProductStatisticsView(APIView):
-    permission_classes = [IsMerchantUser]  # Custom permission class for merchant status
+    permission_classes = [IsMerchantUser]
     serializer_class = ProductStatisticSerializer
 
     def get(self, request, date_from, date_to, num_products):
-        # Convert date strings to datetime objects
         try:
             date_from = datetime.strptime(date_from, '%Y-%m-%d')
             date_to = datetime.strptime(date_to, '%Y-%m-%d')
@@ -115,7 +112,6 @@ class ProductStatisticsView(APIView):
         except ValueError:
             return Response({"error": "Invalid date format or number. Use YYYY-MM-DD for dates and an integer for number of products."}, status=400)
 
-        # Query the OrderItem model
         product_stats = OrderItem.objects.filter(
             order__order_date__range=(date_from, date_to)
         ).values(
