@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,7 +61,7 @@ ROOT_URLCONF = 'app.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,6 +140,22 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
+    'TITLE': 'E-commerce app API',
+    'DESCRIPTION': """
+Welcome to the E-Commerce App API documentation!
+
+This API is the backbone of a dynamic e-commerce platform, designed to offer a seamless and efficient online shopping experience. It caters to both customers and merchants, providing a wide array of functionalities from product browsing and order management to advanced features like product statistics and automated email reminders.
+
+Key Features:
+- **Product Management**: Merchants can list, update, and delete products, offering a diverse range of items to customers.
+- **Order Processing**: Customers can easily place orders, with features like automatic price calculation and order confirmation via email.
+- **Payment Reminders**: Automated email reminders for upcoming payments, enhancing the customer experience and aiding in timely payments.
+- **Product Statistics**: Merchants have access to detailed statistics on product popularity and sales, aiding in strategic decision-making.
+- **User Authentication**: Secure user authentication system, ensuring data safety and integrity for both customers and merchants.
+
+Whether you're a customer looking to shop or a merchant managing your products, this API provides all the necessary tools to make your e-commerce experience smooth and enjoyable. Dive into our endpoints to see how our API can serve your e-commerce needs!
+""",
+    'VERSION': '1.0.0',
     'COMPONENT_SPLIT_REQUEST': True
 }
 
